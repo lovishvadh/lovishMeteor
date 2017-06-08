@@ -4,7 +4,7 @@ import './main.html';
 Resol = new Mongo.Collection('resol');
 
 
-
+Meteor.subscribe("resolutions");
 
 Template.body.helpers({
    resolutions : function(){
@@ -20,10 +20,16 @@ Template.body.helpers({
     }
 });
 
+Template.resolution.helpers({
+    isOwner : function() {
+        return this.owner === Meteor.userId();
+    }
+});
+
 Template.body.events({
     'submit .new-resolution' : (event) => {
         var Title = event.target.title.value;
-       Meteor.call("addResolution",Title);
+        Meteor.call("addResolution",Title);
         event.target.title.value="";
    return false;
     },
@@ -35,10 +41,13 @@ Template.body.events({
 Template.resolution.events({
     
     'click .toggle-checked' : function() {
-      Resol.update(this._id, {$set: {checked : !this.checked}});  
+      Meteor.call("updateResolution",this._id,!this.checked);
     },
     'click .delete' : function() {
-        Resol.remove(this._id);
+       Meteor.call("DeleteResolution",this._id);
+    },
+    'click .toggle-private' : function() {
+        Meteor.call("SetPrivate",this._id,!this.private);
     }
     
 });
